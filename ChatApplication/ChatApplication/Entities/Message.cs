@@ -25,6 +25,15 @@ public partial class Message
     [Column("created_at", TypeName = "timestamp without time zone")]
     public DateTime? CreatedAt { get; set; }
 
+    [Column("is_edited")]
+    public bool IsEdited { get; set; }
+
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; }
+
+    [Column("updated_at", TypeName = "timestamp without time zone")]
+    public DateTime? UpdatedAt { get; set; }
+
     [ForeignKey("ReceiverId")]
     [InverseProperty("MessageReceivers")]
     public virtual User? Receiver { get; set; }

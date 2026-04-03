@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using ChatApplication.Entities;
 using Microsoft.AspNetCore.Authorization;
+using ChatApp.Services;
 
 namespace ChatApp.Controllers
 {
@@ -11,11 +12,11 @@ namespace ChatApp.Controllers
     [Route("api/messages")]
     public class MessagesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IMessageService _messageService;
 
-        public MessagesController(ApplicationDbContext context)
+        public MessagesController(IMessageService messageService)
         {
-            _context = context;
+            _messageService = messageService;
         }
 
         [HttpGet("{userId}")]
@@ -27,19 +28,7 @@ namespace ChatApp.Controllers
                 return Unauthorized();
             }
 
-            var messages = await _context.Messages
-                .Where(m => (m.SenderId == currentUserId && m.ReceiverId == userId) ||
-                            (m.SenderId == userId && m.ReceiverId == currentUserId))
-                .OrderBy(m => m.CreatedAt)
-                .Select(m => new
-                {
-                    senderId = m.SenderId,
-                    content = m.Content,
-                    createdAt = m.CreatedAt,
-                    isMe = m.SenderId == currentUserId
-                })
-                .ToListAsync();
-
+            var messages = await _messageService.GetChatHistory(currentUserId, userId);
             return Ok(messages);
         }
     }

@@ -30,6 +30,8 @@ public partial class ApplicationDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("messages_pkey");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+            entity.Property(e => e.IsEdited).HasDefaultValue(false);
 
             entity.HasOne(d => d.Receiver).WithMany(p => p.MessageReceivers).HasConstraintName("messages_receiver_id_fkey");
 

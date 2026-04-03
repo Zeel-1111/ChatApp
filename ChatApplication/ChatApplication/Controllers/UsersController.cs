@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using ChatApplication.Entities;
+using ChatApp.Services;
 
 namespace ChatApp.Controllers
 {
@@ -7,19 +8,18 @@ namespace ChatApp.Controllers
     [Route("api/users")]
     public class UserController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUserService _userService;
 
-        public UserController(ApplicationDbContext context)
+        public UserController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         [HttpGet]
-        public IActionResult GetUsers()
+        public async Task<IActionResult> GetUsers()
         {
-            return Ok(_context.Users
-                .Select(u => new { u.Id, u.Username })
-                .ToList());
+            var users = await _userService.GetAllUsersExceptCurrent(0);
+            return Ok(users);
         }
     }
 }

@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using ChatApplication.Entities;
+using BCrypt.Net;
 
 namespace ChatApp.Controllers
 {
@@ -20,13 +21,30 @@ namespace ChatApp.Controllers
             _config = config;
         }
 
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(User user)
+        {
+            if (_context.Users.Any(u => u.Username == user.Username))
+            {
+                return BadRequest("Username already exists");
+            }
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "User registered successfully" });
+        }
+
         [HttpPost("login")]
         public IActionResult Login(User login)
         {
-            var user = _context.Users.FirstOrDefault(x =>
-                x.Username == login.Username && x.Password == login.Password);
+            var user = _context.Users.FirstOrDefault(x => x.Username == login.Username);
 
-            if (user == null) return Unauthorized();
+            if (user == null || !BCrypt.Net.BCrypt.Verify(login.Password, user.Password))
+            {
+                return Unauthorized();
+            }
 
             var claims = new[]
             {
@@ -34,8 +52,13 @@ namespace ChatApp.Controllers
                 new Claim(ClaimTypes.Name, user.Username)
             };
 
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var jwtKey = _config["Jwt:Key"];
+            if (string.IsNullOrEmpty(jwtKey))
+            {
+                return StatusCode(500, "JWT Key is not configured");
+            }
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
 
             var token = new JwtSecurityToken(
                 claims: claims,

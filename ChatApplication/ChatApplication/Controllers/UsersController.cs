@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using ChatApplication.Entities;
 using ChatApp.Services;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ChatApp.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/users")]
     public class UserController : ControllerBase
@@ -18,7 +21,13 @@ namespace ChatApp.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await _userService.GetAllUsersExceptCurrent(0);
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int currentUserId))
+            {
+                return Unauthorized();
+            }
+
+            var users = await _userService.GetAllUsersExceptCurrent(currentUserId);
             return Ok(users);
         }
     }

@@ -11,6 +11,11 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtKey))
+{
+    throw new Exception("JWT Key is missing! Please configure 'Jwt:Key' in appsettings.json or 'Jwt__Key' in environment variables.");
+}
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

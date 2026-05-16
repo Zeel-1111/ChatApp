@@ -20,6 +20,7 @@ export interface Message {
   isMe: boolean;
   isEdited?: boolean;
   isDeleted?: boolean;
+  createdAt?: string;
 }
 
 export const useChat = (token: string, receiverId: string) => {
@@ -43,7 +44,13 @@ export const useChat = (token: string, receiverId: string) => {
     if (!token) return;
 
     onReceiveMessage((senderId: string, msg: string, messageId: number) => {
-      setMessages(prev => [...prev, { id: messageId, senderId: parseInt(senderId), content: msg, isMe: false }]);
+      setMessages(prev => [...prev, { 
+        id: messageId, 
+        senderId: parseInt(senderId), 
+        content: msg, 
+        isMe: false,
+        createdAt: new Date().toISOString()
+      }]);
       setTypingUsers(prev => ({ ...prev, [senderId]: false }));
     });
 

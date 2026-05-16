@@ -8,6 +8,7 @@ using ChatApp.Services;
 
 namespace ChatApp.Hubs
 {
+    [Authorize]
     public class ChatHub : Hub
     {
         private readonly IMessageService _messageService;

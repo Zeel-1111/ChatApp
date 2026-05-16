@@ -1,0 +1,66 @@
+name: CI — Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: 🔵 Backend — Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore ChatApplication/ChatApplication.sln
+
+      - name: Build
+        run: dotnet build ChatApplication/ChatApplication.sln --no-restore --configuration Release
+
+      - name: Run tests
+        # Only runs if there's a test project. If not, this step will be skipped or updated later.
+        run: |
+          if [ -d "ChatApplication/ChatApplication.Tests" ]; then
+            dotnet test ChatApplication/ChatApplication.sln --no-build --configuration Release --verbosity normal
+          else
+            echo "No test project found, skipping tests."
+          fi
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION_STRING }}
+          Jwt__Key: ${{ secrets.JWT_KEY }}
+
+  frontend:
+    name: 🟡 Frontend — Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ClientApp/chat-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ClientApp/chat-frontend
+
+      - name: Type check
+        run: npx tsc --noEmit
+        working-directory: ClientApp/chat-frontend
+
+      - name: Build
+        run: npm run build
+        working-directory: ClientApp/chat-frontend

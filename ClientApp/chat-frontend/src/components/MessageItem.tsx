@@ -7,6 +7,7 @@ interface Message {
   isMe: boolean;
   isEdited?: boolean;
   isDeleted?: boolean;
+  createdAt?: string;
 }
 
 interface MessageItemProps {
@@ -27,6 +28,12 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEdit, onDelete }) 
   const handleCancel = () => {
     setEditValue(message.content);
     setIsEditing(false);
+  };
+
+  const formatTime = (dateStr?: string) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -51,7 +58,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, onEdit, onDelete }) 
         <>
           <div className="message-content">
             {message.isDeleted ? "This message was deleted" : message.content}
-            {message.isEdited && !message.isDeleted && <span className="edited-tag">(edited)</span>}
+            <div className="message-meta">
+              {message.isEdited && !message.isDeleted && <span className="edited-tag">(edited)</span>}
+              <span className="timestamp">{formatTime(message.createdAt)}</span>
+            </div>
           </div>
 
           {message.isMe && !message.isDeleted && (

@@ -24,18 +24,18 @@ jobs:
           dotnet publish ChatApplication/ChatApplication/ChatApplication.csproj \
             -c Release -o ./publish
 
-      - name: Deploy via SSH (Template)
-        # This is a template. You need to configure secrets: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            echo "Deploying to production..."
-            # systemctl stop chatapp
-            # cp -r ~/deploy/publish/* /opt/chatapp
-            # systemctl start chatapp
+      # - name: Deploy via SSH (Template)
+      #   # This is a template. You need to configure secrets: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY
+      #   uses: appleboy/ssh-action@v1
+      #   with:
+      #     host: ${{ secrets.DEPLOY_HOST }}
+      #     username: ${{ secrets.DEPLOY_USER }}
+      #     key: ${{ secrets.DEPLOY_SSH_KEY }}
+      #     script: |
+      #       echo "Deploying to production..."
+      #       # systemctl stop chatapp
+      #       # cp -r ~/deploy/publish/* /opt/chatapp
+      #       # systemctl start chatapp
 
   deploy-frontend:
     name: 🚀 Deploy Frontend
@@ -61,14 +61,14 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      - name: Deploy to Netlify (Template)
-        # This is a template. You need to configure secrets: NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID
-        uses: nwtgck/actions-netlify@v3
-        with:
-          publish-dir: ClientApp/chat-frontend/dist
-          production-branch: main
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: "Deploy from GitHub Actions"
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      # - name: Deploy to Netlify (Template)
+      #   # This is a template. You need to configure secrets: NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID
+      #   uses: nwtgck/actions-netlify@v3
+      #   with:
+      #     publish-dir: ClientApp/chat-frontend/dist
+      #     production-branch: main
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     deploy-message: "Deploy from GitHub Actions"
+      #   env:
+      #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
